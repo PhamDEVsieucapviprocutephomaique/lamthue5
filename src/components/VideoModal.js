@@ -50,7 +50,7 @@ const VideoModal = ({ isOpen, onClose }) => {
         {/* Footer */}
         <div className="p-4 bg-gray-100 rounded-b-lg text-center">
           <p className="text-gray-600">
-            Công ty Sơn Đẹp - Chất lượng tạo nên thương hiệu
+            Công ty Thanhdanh - Chất lượng tạo nên thương hiệu
           </p>
         </div>
       </div>

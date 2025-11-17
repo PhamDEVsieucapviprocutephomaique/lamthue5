@@ -28,7 +28,7 @@ const Header = () => {
           <div className="flex justify-between items-center">
             {/* Logo */}
             <Link to="/" className="text-3xl font-bold text-blue-800">
-              SON DEP
+              Thanhdanhluxury
             </Link>
 
             {/* Desktop Navigation */}

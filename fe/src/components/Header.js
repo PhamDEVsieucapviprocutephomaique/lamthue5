@@ -1,10 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { getCartItems } from "../utils/cartUtils";
 
-const Header = () => {
+const Header = ({ onCartClick }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const location = useLocation();
+
+  useEffect(() => {
+    // Cập nhật số lượng giỏ hàng khi component mount
+    setCartCount(getCartItems().length);
+
+    // Listen sự kiện storage thay đổi
+    const handleStorageChange = () => {
+      setCartCount(getCartItems().length);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -89,9 +104,9 @@ const Header = () => {
 
             {/* Search & Cart & Hamburger */}
             <div className="flex items-center space-x-4">
-              {/* Cart Icon - THÊM VÀO ĐÂY */}
-              <Link
-                to="/cart"
+              {/* Cart Icon */}
+              <button
+                onClick={onCartClick}
                 className="relative p-2 text-gray-700 hover:text-blue-800 transition duration-300"
               >
                 <svg
@@ -108,9 +123,9 @@ const Header = () => {
                   />
                 </svg>
                 <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
-                  0
+                  {cartCount}
                 </span>
-              </Link>
+              </button>
 
               {/* Search Form */}
               <form onSubmit={handleSearch} className="hidden md:flex">

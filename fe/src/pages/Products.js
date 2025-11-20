@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { addToCart } from "../utils/cartUtils";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -87,13 +88,31 @@ const Products = () => {
 
   // --- Xử lý Thay đổi Bộ lọc ---
   const handleBrandChange = (e) => {
-    // Chuyển giá trị sang số (ID), 0 nếu chọn "Tất cả"
     setSelectedBrandId(parseInt(e.target.value));
   };
 
   const handleCategoryChange = (e) => {
-    // Chuyển giá trị sang số (ID), 0 nếu chọn "Tất cả"
     setSelectedCategoryId(parseInt(e.target.value));
+  };
+
+  // --- Xử lý Thêm vào giỏ ---
+  const handleAddToCart = (product) => {
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      brand: product.brand_name || "N/A",
+      categoryName: product.category_name || "N/A",
+      price: product.price
+        ? product.price.toLocaleString("vi-VN") + " VNĐ"
+        : "Liên hệ",
+      image:
+        product.images && product.images.length > 0
+          ? product.images[0]
+          : "https://via.placeholder.com/300x200?text=Sơn",
+      quantity: 1,
+    };
+    addToCart(cartItem);
+    alert("✅ Đã thêm vào giỏ hàng!");
   };
 
   // --- Render UI ---
@@ -165,8 +184,6 @@ const Products = () => {
                 ))}
               </select>
             </div>
-
-            {/* Bỏ ô tìm kiếm ở đây, khu vực này trống */}
           </div>
         </div>
 
@@ -182,15 +199,13 @@ const Products = () => {
             Không tìm thấy sản phẩm nào phù hợp với bộ lọc hiện tại.
           </div>
         ) : (
-          // Đã điều chỉnh grid để hiển thị 5 sản phẩm trên desktop (5 cột)
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
             {products.map((product) => (
               <div
                 key={product.id}
-                // Thu nhỏ padding và các thành phần khác để ô sản phẩm bé hơn
                 className="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 overflow-hidden border border-gray-200"
               >
-                {/* Ảnh sản phẩm, giảm chiều cao xuống 128px (h-32) */}
+                {/* Ảnh sản phẩm */}
                 <div className="h-32 bg-gray-200 overflow-hidden">
                   <img
                     src={
@@ -203,13 +218,13 @@ const Products = () => {
                   />
                 </div>
 
-                {/* Nội dung sản phẩm, giảm padding */}
+                {/* Nội dung sản phẩm */}
                 <div className="p-3">
                   <h3 className="text-sm font-semibold text-gray-800 mb-1 h-10 overflow-hidden leading-tight">
                     {product.name}
                   </h3>
 
-                  {/* Thông tin thêm (brand/category), font nhỏ hơn */}
+                  {/* Thông tin thêm (brand/category) */}
                   <div className="text-xs text-gray-500 mb-2">
                     <p>
                       Hãng:{" "}
@@ -225,15 +240,18 @@ const Products = () => {
                     </p>
                   </div>
 
-                  {/* Giá, font nhỏ hơn */}
+                  {/* Giá */}
                   <div className="text-lg font-bold text-red-600 mb-3">
                     {product.price ? product.price.toLocaleString("vi-VN") : 0}{" "}
                     VNĐ
                   </div>
 
                   {/* Nút Hành động */}
-                  <button className="w-full bg-blue-800 text-white text-sm py-1.5 rounded-md hover:bg-blue-900 transition duration-300 font-semibold">
-                    Xem Chi Tiết
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    className="w-full bg-blue-800 text-white text-sm py-1.5 rounded-md hover:bg-blue-900 transition duration-300 font-semibold"
+                  >
+                    🛒 Thêm vào giỏ
                   </button>
                 </div>
               </div>

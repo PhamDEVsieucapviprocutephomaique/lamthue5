@@ -1,7 +1,13 @@
 import React from "react";
+import { addToCart } from "../utils/cartUtils";
 
 const ProductModal = ({ product, isOpen, onClose }) => {
   if (!isOpen || !product) return null;
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    alert("✅ Đã thêm vào giỏ hàng!");
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
@@ -69,7 +75,10 @@ const ProductModal = ({ product, isOpen, onClose }) => {
               <button className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 sm:py-3 px-4 rounded-lg text-base sm:text-lg font-semibold transition">
                 Tư vấn ngay
               </button>
-              <button className="flex-1 bg-blue-800 hover:bg-blue-900 text-white py-2 sm:py-3 px-4 rounded-lg text-base sm:text-lg font-semibold transition">
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 bg-blue-800 hover:bg-blue-900 text-white py-2 sm:py-3 px-4 rounded-lg text-base sm:text-lg font-semibold transition"
+              >
                 Thêm vào giỏ
               </button>
             </div>

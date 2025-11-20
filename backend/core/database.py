@@ -4,12 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# DATABASE_URL = os.getenv("DATABASE_URL")
-
-# DATABASE_URL = "mysql+pymysql://hwuwafaxhosting_dev:123456aA@@202.92.4.66:3306/hwuwafaxhosting_game_nick"
-
-DATABASE_URL = "mysql+pymysql://aqczepfrhosting_dev:123456aA%40@202.92.4.66:3306/aqczepfrhosting_game_nick"
-
+# DATABASE_URL - Cập nhật theo thông tin của bạn
+DATABASE_URL = "mysql+pymysql://rpyatvvchosting_user:123456aA%40@202.92.4.66:3306/rpyatvvchosting_banson"
 
 print(f"DEBUG: DATABASE_URL value is: {DATABASE_URL}")
 
@@ -17,7 +13,6 @@ print(f"DEBUG: DATABASE_URL value is: {DATABASE_URL}")
 engine = create_engine(
     DATABASE_URL,
     echo=True,
-    # Quan trọng cho MySQL
     pool_pre_ping=True,
     pool_recycle=3600,
     pool_size=5,
@@ -28,16 +23,18 @@ engine = create_engine(
     }
 )
 
+
 def create_db_and_tables():
     """
     Tạo tất cả tables trong database MySQL
     """
     try:
         SQLModel.metadata.create_all(engine)
-        print(" Đã tạo tables thành công trong MySQL!")
+        print("✅ Đã tạo tables thành công trong MySQL!")
     except Exception as e:
-        print(f" Lỗi khi tạo tables: {e}")
+        print(f"❌ Lỗi khi tạo tables: {e}")
         raise
+
 
 def get_session():
     """

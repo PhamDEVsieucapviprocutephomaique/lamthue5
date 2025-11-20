@@ -1,328 +1,245 @@
-import React, { useState } from "react";
-import ProductList from "../components/ProductList";
+import React, { useState, useEffect, useCallback } from "react";
 
 const Products = () => {
-  const brands = [
-    "Tất cả",
-    "Dulux",
-    "Jotun",
-    "Kova",
-    "Mykolor",
-    "Nippon",
-    "Maxilite",
-    "Spec",
-  ];
-  const categories = [
-    { id: "interior", name: "Sơn nội thất" },
-    { id: "exterior", name: "Sơn ngoại thất" },
-    { id: "waterproof", name: "Sơn chống thấm" },
-    { id: "decorative", name: "Sơn trang trí" },
-    { id: "wood", name: "Sơn gỗ" },
-    { id: "metal", name: "Sơn kim loại" },
-  ];
+  const [products, setProducts] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
 
-  const [selectedBrand, setSelectedBrand] = useState("Tất cả");
-  const [selectedCategory, setSelectedCategory] = useState("interior");
+  // State cho bộ lọc, sử dụng 0 để đại diện cho "Tất cả"
+  const [selectedBrandId, setSelectedBrandId] = useState(0);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(0);
 
-  // Data sản phẩm đầy đủ
-  const products = [
-    // Sơn nội thất
-    {
-      id: 1,
-      name: "Sơn nội thất cao cấp A",
-      brand: "Dulux",
-      category: "interior",
-      description: "Sơn chất lượng cao cho không gian nội thất",
-      price: "500.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=200&fit=crop",
-    },
-    {
-      id: 2,
-      name: "Sơn nội thất siêu bền B",
-      brand: "Jotun",
-      category: "interior",
-      description: "Độ bền vượt trội, dễ lau chùi",
-      price: "650.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=200&fit=crop",
-    },
-    {
-      id: 3,
-      name: "Sơn nội thất chống ẩm C",
-      brand: "Kova",
-      category: "interior",
-      description: "Đặc biệt cho khu vực ẩm ướt",
-      price: "750.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=300&h=200&fit=crop",
-    },
-    {
-      id: 4,
-      name: "Sơn nội thất mờ D",
-      brand: "Mykolor",
-      category: "interior",
-      description: "Hoàn thiện mờ sang trọng",
-      price: "550.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=300&h=200&fit=crop",
-    },
-    {
-      id: 5,
-      name: "Sơn nội thất bóng E",
-      brand: "Nippon",
-      category: "interior",
-      description: "Bề mặt bóng sáng cao cấp",
-      price: "600.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1505798577917-a65157d3320a?w=300&h=200&fit=crop",
-    },
-    {
-      id: 6,
-      name: "Sơn nội thất bán bóng F",
-      brand: "Maxilite",
-      category: "interior",
-      description: "Độ bóng vừa phải, dễ bảo trì",
-      price: "580.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1563291074-2bf8677ac0e5?w=300&h=200&fit=crop",
-    },
-    {
-      id: 7,
-      name: "Sơn nội thất siêu trắng",
-      brand: "Spec",
-      category: "interior",
-      description: "Màu trắng tinh khiết, phủ đều",
-      price: "520.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=300&h=200&fit=crop",
-    },
-    {
-      id: 8,
-      name: "Sơn nội thất chống bám bẩn",
-      brand: "Dulux",
-      category: "interior",
-      description: "Hạn chế bụi bẩn bám trên bề mặt",
-      price: "680.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1571624436279-b272aff752b5?w=300&h=200&fit=crop",
-    },
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    // Sơn ngoại thất
-    {
-      id: 9,
-      name: "Sơn ngoại thất chống nắng A",
-      brand: "Jotun",
-      category: "exterior",
-      description: "Chống chịu thời tiết khắc nghiệt",
-      price: "800.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=300&h=200&fit=crop",
-    },
-    {
-      id: 10,
-      name: "Sơn ngoại thất bền màu B",
-      brand: "Dulux",
-      category: "exterior",
-      description: "Giữ màu sắc lâu dài",
-      price: "900.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=300&h=200&fit=crop",
-    },
-    {
-      id: 11,
-      name: "Sơn ngoại thất chống bám bẩn C",
-      brand: "Kova",
-      category: "exterior",
-      description: "Hạn chế bụi bẩn bám trên bề mặt",
-      price: "950.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=300&h=200&fit=crop",
-    },
-    {
-      id: 12,
-      name: "Sơn ngoại thất chống rong rêu D",
-      brand: "Nippon",
-      category: "exterior",
-      description: "Ngăn ngừa sự phát triển của rong rêu",
-      price: "1.100.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1567446537711-4302fea3c331?w=300&h=200&fit=crop",
-    },
+  const API_BASE_URL = "http://127.0.0.1:8000/api";
 
-    // Sơn chống thấm
-    {
-      id: 13,
-      name: "Sơn chống thấm cao cấp A",
-      brand: "Spec",
-      category: "waterproof",
-      description: "Hiệu quả chống thấm tối ưu",
-      price: "1.200.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=200&fit=crop",
-    },
-    {
-      id: 14,
-      name: "Sơn chống thấm đa năng B",
-      brand: "Kova",
-      category: "waterproof",
-      description: "Ứng dụng đa dạng",
-      price: "1.000.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=200&fit=crop",
-    },
-    {
-      id: 15,
-      name: "Sơn chống thấm gốc xi măng C",
-      brand: "Jotun",
-      category: "waterproof",
-      description: "Dành cho bề mặt xi măng, bê tông",
-      price: "1.300.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=300&h=200&fit=crop",
-    },
+  // --- 1. HÀM GỌI API LẤY SẢN PHẨM (Có Lọc) ---
+  const fetchProducts = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-    // Sơn trang trí
-    {
-      id: 16,
-      name: "Sơn hiệu ứng giả đá",
-      brand: "Maxilite",
-      category: "decorative",
-      description: "Tạo hiệu ứng đá tự nhiên",
-      price: "1.500.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=300&h=200&fit=crop",
-    },
-    {
-      id: 17,
-      name: "Sơn hiệu ứng kim loại",
-      brand: "Spec",
-      category: "decorative",
-      description: "Ánh kim loại sang trọng",
-      price: "1.800.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1571624436279-b272aff752b5?w=300&h=200&fit=crop",
-    },
-    {
-      id: 18,
-      name: "Sơn hiệu ứng gỗ",
-      brand: "Kova",
-      category: "decorative",
-      description: "Vân gỗ tự nhiên chân thực",
-      price: "1.600.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=300&h=200&fit=crop",
-    },
+    try {
+      let queryString = "";
 
-    // Sơn gỗ
-    {
-      id: 19,
-      name: "Sơn gỗ trong nhà",
-      brand: "Mykolor",
-      category: "wood",
-      description: "Bảo vệ và làm đẹp đồ gỗ nội thất",
-      price: "450.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=300&h=200&fit=crop",
-    },
-    {
-      id: 20,
-      name: "Sơn gỗ ngoài trời",
-      brand: "Maxilite",
-      category: "wood",
-      description: "Chống mối mọt, chịu thời tiết",
-      price: "550.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1563089145-599997674d42?w=300&h=200&fit=crop",
-    },
+      if (selectedBrandId > 0) {
+        queryString += `brand_id=${selectedBrandId}`;
+      }
 
-    // Sơn kim loại
-    {
-      id: 21,
-      name: "Sơn chống gỉ sắt thép",
-      brand: "Jotun",
-      category: "metal",
-      description: "Bảo vệ kim loại khỏi gỉ sét",
-      price: "480.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=300&h=200&fit=crop",
-    },
-    {
-      id: 22,
-      name: "Sơn kim loại nhiệt độ cao",
-      brand: "Dulux",
-      category: "metal",
-      description: "Chịu nhiệt lên đến 600°C",
-      price: "750.000 VNĐ",
-      image:
-        "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=300&h=200&fit=crop",
-    },
-  ];
+      if (selectedCategoryId > 0) {
+        queryString +=
+          (queryString.length > 0 ? "&" : "") +
+          `category_id=${selectedCategoryId}`;
+      }
 
-  const filteredProducts = products.filter((product) => {
-    const brandMatch =
-      selectedBrand === "Tất cả" || product.brand === selectedBrand;
-    const categoryMatch = product.category === selectedCategory;
-    return brandMatch && categoryMatch;
-  });
+      const url = `${API_BASE_URL}/products${
+        queryString ? "?" + queryString : ""
+      }`;
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`Lỗi HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setProducts(data);
+    } catch (err) {
+      console.error("Lỗi khi lấy dữ liệu sản phẩm:", err);
+      setError("Không thể tải sản phẩm. Vui lòng kiểm tra kết nối API.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedBrandId, selectedCategoryId]);
+
+  // --- 2. HÀM GỌI API LẤY DỮ LIỆU LỌC (Brands và Categories) ---
+  const fetchFilters = async () => {
+    try {
+      // Lấy Brands
+      const brandsResponse = await fetch(
+        `${API_BASE_URL}/products/brands/list`
+      );
+      const brandsData = await brandsResponse.json();
+      setBrands(brandsData);
+
+      // Lấy Categories
+      const categoriesResponse = await fetch(
+        `${API_BASE_URL}/products/categories/list`
+      );
+      const categoriesData = await categoriesResponse.json();
+      setCategories(categoriesData);
+    } catch (err) {
+      console.error("Lỗi khi tải dữ liệu lọc:", err);
+    }
+  };
+
+  // --- 3. EFFECTS ---
+
+  // Lấy danh sách Brand/Category khi component mount
+  useEffect(() => {
+    fetchFilters();
+  }, []);
+
+  // Lấy danh sách Sản phẩm khi Brand/Category thay đổi
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  // --- Xử lý Thay đổi Bộ lọc ---
+  const handleBrandChange = (e) => {
+    // Chuyển giá trị sang số (ID), 0 nếu chọn "Tất cả"
+    setSelectedBrandId(parseInt(e.target.value));
+  };
+
+  const handleCategoryChange = (e) => {
+    // Chuyển giá trị sang số (ID), 0 nếu chọn "Tất cả"
+    setSelectedCategoryId(parseInt(e.target.value));
+  };
+
+  // --- Render UI ---
+  if (isLoading) {
+    return (
+      <div className="pt-24 py-12 min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-xl text-blue-600 font-medium">
+          Đang tải sản phẩm...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="pt-16 py-8">
+    <div className="pt-24 py-12 min-h-screen bg-gray-50">
       <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold text-center text-blue-800 mb-8">
-          SẢN PHẨM
+        <h1 className="text-4xl font-bold text-center text-blue-800 mb-10">
+          TẤT CẢ SẢN PHẨM
         </h1>
 
-        {/* Filter section */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-bold text-lg mb-3">Danh mục sản phẩm</h3>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`px-4 py-2 rounded-lg transition duration-300 ${
-                      selectedCategory === category.id
-                        ? "bg-blue-800 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                  >
-                    {category.name}
-                  </button>
+        {/* Khu vực Lọc (Chỉ giữ lại Hãng và Loại) */}
+        <div className="bg-white p-6 rounded-lg shadow-xl mb-8 border border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">
+            Bộ lọc sản phẩm
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Lọc theo Hãng (Brand) */}
+            <div className="md:col-span-1">
+              <label
+                htmlFor="brand-filter"
+                className="block text-sm font-medium mb-2 text-gray-700"
+              >
+                Hãng (Brand):
+              </label>
+              <select
+                id="brand-filter"
+                value={selectedBrandId}
+                onChange={handleBrandChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value={0}>-- Tất cả các Hãng --</option>
+                {brands.map((brand) => (
+                  <option key={brand.id} value={brand.id}>
+                    {brand.name}
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
 
-            <div>
-              <h3 className="font-bold text-lg mb-3">Hãng sơn</h3>
-              <div className="flex flex-wrap gap-2">
-                {brands.map((brand) => (
-                  <button
-                    key={brand}
-                    onClick={() => setSelectedBrand(brand)}
-                    className={`px-4 py-2 rounded-lg transition duration-300 ${
-                      selectedBrand === brand
-                        ? "bg-red-600 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                  >
-                    {brand}
-                  </button>
+            {/* Lọc theo Loại Sơn (Category) */}
+            <div className="md:col-span-1">
+              <label
+                htmlFor="category-filter"
+                className="block text-sm font-medium mb-2 text-gray-700"
+              >
+                Loại Sơn (Category):
+              </label>
+              <select
+                id="category-filter"
+                value={selectedCategoryId}
+                onChange={handleCategoryChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value={0}>-- Tất cả các Loại --</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
+
+            {/* Bỏ ô tìm kiếm ở đây, khu vực này trống */}
           </div>
         </div>
 
-        <ProductList
-          products={filteredProducts}
-          categoryName={
-            categories.find((cat) => cat.id === selectedCategory)?.name ||
-            "Sản phẩm"
-          }
-        />
+        {/* Danh sách sản phẩm */}
+        {error && (
+          <div className="text-center text-xl text-red-700 py-4 bg-red-100 border border-red-300 rounded-lg mb-6">
+            {error}
+          </div>
+        )}
+
+        {products.length === 0 ? (
+          <div className="text-center text-xl text-gray-500 py-16 bg-white rounded-lg shadow-md">
+            Không tìm thấy sản phẩm nào phù hợp với bộ lọc hiện tại.
+          </div>
+        ) : (
+          // Đã điều chỉnh grid để hiển thị 5 sản phẩm trên desktop (5 cột)
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+            {products.map((product) => (
+              <div
+                key={product.id}
+                // Thu nhỏ padding và các thành phần khác để ô sản phẩm bé hơn
+                className="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 overflow-hidden border border-gray-200"
+              >
+                {/* Ảnh sản phẩm, giảm chiều cao xuống 128px (h-32) */}
+                <div className="h-32 bg-gray-200 overflow-hidden">
+                  <img
+                    src={
+                      product.images && product.images.length > 0
+                        ? product.images[0]
+                        : "https://via.placeholder.com/200x128?text=No+Image"
+                    }
+                    alt={product.name}
+                    className="w-full h-full object-cover transition duration-500 hover:scale-105"
+                  />
+                </div>
+
+                {/* Nội dung sản phẩm, giảm padding */}
+                <div className="p-3">
+                  <h3 className="text-sm font-semibold text-gray-800 mb-1 h-10 overflow-hidden leading-tight">
+                    {product.name}
+                  </h3>
+
+                  {/* Thông tin thêm (brand/category), font nhỏ hơn */}
+                  <div className="text-xs text-gray-500 mb-2">
+                    <p>
+                      Hãng:{" "}
+                      <span className="font-medium text-red-600">
+                        {product.brand_name || "N/A"}
+                      </span>
+                    </p>
+                    <p>
+                      Loại:{" "}
+                      <span className="font-medium text-blue-700">
+                        {product.category_name || "N/A"}
+                      </span>
+                    </p>
+                  </div>
+
+                  {/* Giá, font nhỏ hơn */}
+                  <div className="text-lg font-bold text-red-600 mb-3">
+                    {product.price ? product.price.toLocaleString("vi-VN") : 0}{" "}
+                    VNĐ
+                  </div>
+
+                  {/* Nút Hành động */}
+                  <button className="w-full bg-blue-800 text-white text-sm py-1.5 rounded-md hover:bg-blue-900 transition duration-300 font-semibold">
+                    Xem Chi Tiết
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

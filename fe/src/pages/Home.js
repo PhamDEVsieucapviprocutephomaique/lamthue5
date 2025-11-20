@@ -6,101 +6,12 @@ import NewsSection from "../components/NewsSection";
 import VideoModal from "../components/VideoModal";
 
 const Home = () => {
-  // Data sản phẩm theo nhóm
-  const productGroups = [
-    {
-      id: "interior",
-      name: "Sơn Nội Thất",
-      count: 8,
-      products: [
-        {
-          id: 1,
-          name: "Sơn nội thất cao cấp Dulux",
-          price: "4,666,670 VNĐ",
-          brand: "Dulux",
-          image:
-            "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=200&fit=crop",
-        },
-      ],
-    },
-    {
-      id: "exterior",
-      name: "Sơn Ngoại Thất",
-      count: 11,
-      products: [
-        {
-          id: 2,
-          name: "Sơn ngoại thất Jotun",
-          price: "9,500,000 VNĐ",
-          brand: "Jotun",
-          image:
-            "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=200&fit=crop",
-        },
-      ],
-    },
-    {
-      id: "waterproof",
-      name: "Sơn Chống Thấm",
-      count: 2,
-      products: [
-        {
-          id: 3,
-          name: "Sơn chống thấm Kova",
-          price: "11,666,700 VNĐ",
-          brand: "Kova",
-          image:
-            "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=300&h=200&fit=crop",
-        },
-      ],
-    },
-    {
-      id: "decorative",
-      name: "Sơn Trang Trí",
-      count: 13,
-      products: [
-        {
-          id: 4,
-          name: "Sơn trang trí Mykolor",
-          price: "22,000,000 VNĐ",
-          brand: "Mykolor",
-          image:
-            "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=300&h=200&fit=crop",
-        },
-      ],
-    },
-    {
-      id: "wood",
-      name: "Sơn Gỗ",
-      count: 5,
-      products: [
-        {
-          id: 5,
-          name: "Sơn gỗ Nippon",
-          price: "40,000,000 VNĐ",
-          brand: "Nippon",
-          image:
-            "https://images.unsplash.com/photo-1505798577917-a65157d3320a?w=300&h=200&fit=crop",
-        },
-      ],
-    },
-    {
-      id: "metal",
-      name: "Sơn Kim Loại",
-      count: 3,
-      products: [
-        {
-          id: 6,
-          name: "Sơn kim loại Maxilite",
-          price: "55,000,000 VNĐ",
-          brand: "Maxilite",
-          image:
-            "https://images.unsplash.com/photo-1563291074-2bf8677ac0e5?w=300&h=200&fit=crop",
-        },
-      ],
-    },
-  ];
+  const [productGroups, setProductGroups] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Data tin tức
+  const API_BASE_URL = "http://127.0.0.1:8000/api";
+
+  // Data tin tức (Giữ nguyên)
   const news = [
     {
       id: 1,
@@ -128,28 +39,139 @@ const Home = () => {
     },
   ];
 
-  const [activeCategory, setActiveCategory] = useState("interior");
+  const [activeCategory, setActiveCategory] = useState(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
 
+  // --- LOGIC LẤY DỮ LIỆU TỪ API (Đã Fix Lookup Category Name & Chuẩn hóa Description) ---
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // 1. Lấy danh sách BRANDS (Hãng Sơn)
+      const brandsResponse = await fetch(
+        `${API_BASE_URL}/products/brands/list`
+      );
+      const brandsData = await brandsResponse.json();
+
+      // 2. Lấy danh sách CATEGORIES (Loại Sơn) để Lookup tên
+      const categoriesResponse = await fetch(
+        `${API_BASE_URL}/products/categories/list`
+      );
+      const categoriesData = await categoriesResponse.json();
+
+      const categoryMap = categoriesData.reduce((map, cat) => {
+        map[cat.id] = cat.name;
+        return map;
+      }, {});
+
+      // 3. Lấy danh sách TOÀN BỘ sản phẩm
+      const productsResponse = await fetch(`${API_BASE_URL}/products`);
+      const allProducts = await productsResponse.json();
+
+      // 4. Chuẩn hóa dữ liệu thành format productGroups theo Tên Hãng
+      const groups = brandsData
+        .map((brand) => {
+          const productsInBrand = allProducts.filter(
+            (p) =>
+              p.brand_name &&
+              brand.name &&
+              p.brand_name.toUpperCase().trim() ===
+                brand.name.toUpperCase().trim()
+          );
+
+          const items = productsInBrand.map((p) => {
+            // Lookup Tên Loại Sơn
+            const categoryNameFromId = p.category_id
+              ? categoryMap[p.category_id]
+              : p.category_name || "N/A";
+
+            return {
+              id: p.id,
+              name: p.name,
+              price: p.price
+                ? p.price.toLocaleString("vi-VN") + " VNĐ"
+                : "Liên hệ",
+              brand: p.brand_name || brand.name || "N/A",
+              categoryName: categoryNameFromId || "N/A",
+              image:
+                p.images && p.images.length > 0
+                  ? p.images[0]
+                  : "https://via.placeholder.com/300x200?text=Sơn",
+              // *** CHUẨN HÓA DESCRIPTION: Thử các tên trường phổ biến ***
+              description:
+                p.description || p.content || p.full_description || null,
+            };
+          });
+
+          return {
+            id: brand.id,
+            name: brand.name,
+            count: productsInBrand.length,
+            products: items,
+          };
+        })
+        .filter((group) => group.count > 0);
+
+      setProductGroups(groups);
+
+      if (groups.length > 0) {
+        setActiveCategory(groups[0].id);
+      }
+    } catch (err) {
+      console.error("Lỗi khi tải dữ liệu trang chủ:", err);
+      setProductGroups([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // --- useEffect cho Data Fetching ---
   useEffect(() => {
-    // Show video modal on first visit
+    fetchData();
+  }, []);
+
+  // --- useEffect cho Video Modal (Giữ nguyên logic cũ) ---
+  useEffect(() => {
     const hasSeenVideo = localStorage.getItem("hasSeenVideo");
-    if (!hasSeenVideo) {
+    if (!hasSeenVideo && !isLoading) {
       const timer = setTimeout(() => {
         setShowVideoModal(true);
         localStorage.setItem("hasSeenVideo", "true");
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isLoading]);
 
+  // --- Logic Xử lý Click (Giữ nguyên logic cũ) ---
   const handleCategoryClick = (categoryId) => {
     setActiveCategory(categoryId);
-    const element = document.getElementById(categoryId);
+    const element = document.getElementById(`category-${categoryId}`);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  // --- Render UI ---
+
+  if (isLoading) {
+    return (
+      <div className="pt-24 py-12 min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-xl text-blue-600 font-medium">
+          Đang tải dữ liệu trang chủ...
+        </p>
+      </div>
+    );
+  }
+
+  if (productGroups.length === 0 && !isLoading) {
+    return (
+      <div className="pt-24 py-12 min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-xl text-red-700 font-medium">
+          Không thể tải dữ liệu Hãng Sơn và Sản phẩm. Vui lòng kiểm tra API
+          Backend.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-16">
@@ -157,15 +179,18 @@ const Home = () => {
         isOpen={showVideoModal}
         onClose={() => setShowVideoModal(false)}
       />
+
       <HeroSlider />
+
       <CategoryNav
         categories={productGroups}
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
       />
+
       <div className="container mx-auto px-4 py-8">
         {productGroups.map((group, index) => (
-          <div id={group.id} key={group.id}>
+          <div id={`category-${group.id}`} key={group.id}>
             <ProductSection
               group={group}
               isLast={index === productGroups.length - 1}
@@ -173,6 +198,7 @@ const Home = () => {
           </div>
         ))}
       </div>
+
       <NewsSection news={news} />
     </div>
   );

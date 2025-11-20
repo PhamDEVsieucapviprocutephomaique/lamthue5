@@ -74,12 +74,45 @@ const Header = () => {
                     Liên hệ
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    to="/admin"
+                    className={`${isActive(
+                      "/admin"
+                    )} transition duration-300 text-lg`}
+                  >
+                    Admin
+                  </Link>
+                </li>
               </ul>
             </nav>
 
-            {/* Search & Hamburger */}
+            {/* Search & Cart & Hamburger */}
             <div className="flex items-center space-x-4">
-              {/* Search Form - Hidden on mobile */}
+              {/* Cart Icon - THÊM VÀO ĐÂY */}
+              <Link
+                to="/cart"
+                className="relative p-2 text-gray-700 hover:text-blue-800 transition duration-300"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5.5M7 13l2.5 5.5m0 0L17 21"
+                  />
+                </svg>
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
+                  0
+                </span>
+              </Link>
+
+              {/* Search Form */}
               <form onSubmit={handleSearch} className="hidden md:flex">
                 <input
                   type="text"
@@ -106,7 +139,7 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Mobile Search - Show below on mobile */}
+          {/* Mobile Search */}
           <form onSubmit={handleSearch} className="md:hidden mt-3 flex">
             <input
               type="text"
@@ -125,35 +158,27 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
-          {/* Background Overlay */}
           <div
             className="absolute inset-0 bg-black bg-opacity-70"
             onClick={toggleMenu}
           ></div>
-
-          {/* Menu Content */}
-          <div className="absolute top-0 right-0 h-full w-80 bg-white shadow-2xl transform transition-transform">
+          <div className="absolute top-0 right-0 h-full w-80 bg-white shadow-2xl">
             <div className="p-6">
-              {/* Close Button */}
               <button
-                className="absolute top-6 right-6 text-3xl text-gray-700 hover:text-red-600 transition duration-300"
+                className="absolute top-6 right-6 text-3xl text-gray-700"
                 onClick={toggleMenu}
               >
                 ✕
               </button>
-
-              {/* Menu Items */}
               <nav className="mt-16">
                 <ul className="space-y-6">
                   <li>
                     <Link
                       to="/"
-                      className={`block py-4 text-2xl font-medium ${isActive(
-                        "/"
-                      )} border-b border-gray-200`}
+                      className="block py-4 text-2xl font-medium border-b border-gray-200"
                       onClick={toggleMenu}
                     >
                       Trang chủ
@@ -162,9 +187,7 @@ const Header = () => {
                   <li>
                     <Link
                       to="/san-pham"
-                      className={`block py-4 text-2xl font-medium ${isActive(
-                        "/san-pham"
-                      )} border-b border-gray-200`}
+                      className="block py-4 text-2xl font-medium border-b border-gray-200"
                       onClick={toggleMenu}
                     >
                       Sản phẩm
@@ -173,9 +196,7 @@ const Header = () => {
                   <li>
                     <Link
                       to="/tin-tuc"
-                      className={`block py-4 text-2xl font-medium ${isActive(
-                        "/tin-tuc"
-                      )} border-b border-gray-200`}
+                      className="block py-4 text-2xl font-medium border-b border-gray-200"
                       onClick={toggleMenu}
                     >
                       Tin tức
@@ -184,12 +205,19 @@ const Header = () => {
                   <li>
                     <Link
                       to="/lien-he"
-                      className={`block py-4 text-2xl font-medium ${isActive(
-                        "/lien-he"
-                      )}`}
+                      className="block py-4 text-2xl font-medium border-b border-gray-200"
                       onClick={toggleMenu}
                     >
                       Liên hệ
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/admin"
+                      className="block py-4 text-2xl font-medium"
+                      onClick={toggleMenu}
+                    >
+                      Admin
                     </Link>
                   </li>
                 </ul>
